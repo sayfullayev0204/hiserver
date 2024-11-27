@@ -1,21 +1,24 @@
-import environ
 import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = environ.Env(
-    # set casting, default value
-    DEBUG=(bool, False)
-)
-environ.Env.read_env(".env")
+from dotenv import load_dotenv, find_dotenv
 
-SECRET_KEY = "3vz#0mgg3cbxjp!19udte9jfj6li&noy6x@a=cjy+(p$k*q#5&"
-DEBUG = True
-ALLOWED_HOSTS = ['*']
+load_dotenv(find_dotenv(".env"))
 
-BOT_TOKEN = "7565834235:AAErYbmri3B2YhdA4rHWCqVwxdPA59sV6kk"
+SECRET_KEY = os.getenv("SECRET_KEY")
+DEBUG = os.getenv("DEBUG")
+if DEBUG is not None:
+    DEBUG = DEBUG.lower() in ["true", "1"]
+else:
+    DEBUG = False
+
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS").split(",")
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -72,22 +75,19 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "config.wsgi.application"
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+WSGI_APPLICATION = "core.wsgi.application"
+ASGI_APPLICATION = "core.asgi.application"
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_HOST"),
+        "PORT": os.getenv("POSTGRES_PORT"),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -110,9 +110,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "uz"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Tashkent"
 
 USE_I18N = True
 
@@ -126,15 +126,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-import os
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+STATIC_URL = "static/"
+STATICFILES_DIRS = [str(BASE_DIR.joinpath("static"))]
+STATIC_ROOT = str(BASE_DIR.joinpath("staticfiles"))
 
-# Static files
-STATIC_URL = "/static/"
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+MEDIA_URL = "media/"
+MEDIA_ROOT = str(BASE_DIR.joinpath("media"))
 
 LOGIN_URL = "login"
 
@@ -149,16 +147,11 @@ MESSAGE_TAGS = {
     messages.WARNING: "warning",
     messages.ERROR: "danger",
 }
-CORS_ALLOWED_ORIGINS = [
-    "https://seb-production.up.railway.app",
-    "https://uzum-production.up.railway.app",
-    "http://komilxon-wk.uz",
-]
 
 # Maksimal fayl hajmini baytlarda (bu yerda 50 MB qilib ko'rsatilgan)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
-
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_METHODS = [
     "GET",
     "POST",
